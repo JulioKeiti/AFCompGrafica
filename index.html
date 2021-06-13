@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <title>Babylon.js sample code</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
+    <script src="https://preview.babylonjs.com/ammo.js"></script>
+    <script src="https://preview.babylonjs.com/cannon.js"></script>
+    <script src="https://preview.babylonjs.com/Oimo.js"></script>
+    <script src="https://preview.babylonjs.com/earcut.min.js"></script>
+    <script src="https://preview.babylonjs.com/babylon.js"></script>
+    <script src="https://preview.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+    <script src="https://preview.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+    <script src="https://preview.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+    <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+    <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+    <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="https://preview.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
+    <script src="Ball.js"></script>
+    <script src="Plataformas.js"></script>
+    <script src="Plataforma.js"></script>
+    <script src="Cano.js"></script>
+    <script src="Balao.js"></script>
+    <script src="Balls.js"></script>
+    <script src="Ballss.js"></script>
+    <script src="Circle.js"></script>
+    <script src="Cube.js"></script>
+
+    <style>
+        html,
+        body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #renderCanvas {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+        var canvas = document.getElementById("renderCanvas");
+
+        var engine = null;
+        var scene = null;
+        var sceneToRender = null;
+        var ballCount = 10;
+        var ball = null;
+        var killBox = null;
+
+        var createDefaultEngine = function () { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true, disableWebGL2Support: false }); };
+        var createScene = function () {
+            var scene = new BABYLON.Scene(engine);
+
+            createLightAndCamera(scene);
+
+            scene.enablePhysics(new BABYLON.Vector3(0, -5, 0), new BABYLON.CannonJSPlugin(false));
+
+
+            const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 900 }, scene);
+            const skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+            skyboxMaterial.backFaceCulling = false;
+            skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/skybox", scene);
+            skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+            skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+            skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+            skybox.material = skyboxMaterial;
+
+
+            const physEngine = scene.getPhysicsEngine();
+
+            killBox = createKillBox(scene);
+
+            var woodPlatRot = new BABYLON.Vector3(5, Math.PI / 2, 0);
+            var woodPlatPos = new BABYLON.Vector3(-3, 0, 0);
+            var woodPlat = new Plataformas(scene, woodPlatPos, woodPlatRot, 5.5, 2.5, 0.25);
+            var woodPlatRot1 = new BABYLON.Vector3(5, - Math.PI / 2, 0);
+            var woodPlatPos1 = new BABYLON.Vector3(7, 0, 0);
+            var woodPla1t = new Plataformas(scene, woodPlatPos1, woodPlatRot1, 5.5, 2.5, 0.25);
+            var FPos = new BABYLON.Vector3(2, -20, -3);
+            var FRot = new BABYLON.Vector3(0, 0, 0);
+            var FProtec = new Plataformas(scene, FPos, FRot, 40, 20, 0.25);
+            box2 = FProtec.getPlataform();
+            box2.visibility = 0;
+            var FPos1 = new BABYLON.Vector3(2, -20, 3);
+            var FRot1 = new BABYLON.Vector3(0, 0, 0);
+            var FProtec1 = new Plataformas(scene, FPos1, FRot1, 40, 20, 0.25);
+            box3 = FProtec1.getPlataform();
+            box3.visibility = 0;
+            var woodPlatRot2 = new BABYLON.Vector3(0, Math.PI / 2, 0);
+            var woodPlatPos2 = new BABYLON.Vector3(0, 0, 0);
+            var woodPlat2 = new Plataforma(scene, woodPlatPos2, woodPlatRot2, 6, 2.5, 0.25);
+            woodPlat2.animatePlat(woodPlatPos2, new BABYLON.Vector3(6, -5, 0), "rotation.z", BABYLON.Tools.ToRadians(0), BABYLON.Tools.ToRadians(-360))
+            var woodPlatRot0 = new BABYLON.Vector3(0, Math.PI / 2, 0);
+            var woodPlatPos0 = new BABYLON.Vector3(0, 0, 0);
+            var woodPlat0 = new Plataforma(scene, woodPlatPos0, woodPlatRot0, 6, 2.5, 0.25);
+            woodPlat0.animatePlat(woodPlatPos0, new BABYLON.Vector3(-2, -5, 0), "rotation.z", BABYLON.Tools.ToRadians(0), BABYLON.Tools.ToRadians(360))
+            var woodPlatRot3 = new BABYLON.Vector3(0, Math.PI / 2, 0);
+            var woodPlatPos3 = new BABYLON.Vector3(10.5, -10, 0);
+            var woodPlat3 = new Plataformas(scene, woodPlatPos3, woodPlatRot3, 35, 4, 0.25);
+            box1 = woodPlat3.getPlataform();
+            box1.visibility = 0;
+            var woodPlatRot4 = new BABYLON.Vector3(0, Math.PI / 2, 0);
+            var woodPlatPos4 = new BABYLON.Vector3(-6.4, -10, 0);
+            var woodPlat4 = new Plataformas(scene, woodPlatPos4, woodPlatRot4, 35, 4, 0.25);
+            box = woodPlat4.getPlataform();
+            box.visibility = 0;
+            var woodPlatRot6 = new BABYLON.Vector3(Math.PI / 2, Math.PI / 2, 0);
+            var woodPlatPos6 = new BABYLON.Vector3(0, 0, 0);
+            var woodPlat6 = new Plataforma(scene, woodPlatPos6, woodPlatRot6, 6, 2.5, 0.25);
+            woodPlat6.animatePlat(woodPlatPos6, new BABYLON.Vector3(7, -20, 0), "position.x", -1, 5,)
+            var woodPlatRot7 = new BABYLON.Vector3(-Math.PI / 2, Math.PI / 2, 0);
+            var woodPlatPos7 = new BABYLON.Vector3(0, 0, 0);
+            var woodPlat7 = new Plataforma(scene, woodPlatPos7, woodPlatRot7, 6, 2.5, 0.25);
+            woodPlat7.animatePlat(woodPlatPos7, new BABYLON.Vector3(2, -14, 0), "position.x", 5, -1);
+            var woodPlatRot8 = new BABYLON.Vector3(5.5, -Math.PI / 2, 0);
+            var woodPlatPos8 = new BABYLON.Vector3(8, -30, 0);
+            var woodPlat8 = new Plataformas(scene, woodPlatPos8, woodPlatRot8, 6.7, 3.5, 0.25);
+            var woodPlatRot8 = new BABYLON.Vector3(5.5, Math.PI / 2, 0);
+            var woodPlatPos8 = new BABYLON.Vector3(-4, -30, 0);
+            var woodPlat8 = new Plataformas(scene, woodPlatPos8, woodPlatRot8, 6.7, 3.5, 0.25);
+            var woodPlatRot10 = new BABYLON.Vector3(Math.PI / 2, Math.PI / 2, 0);
+            var woodPlatPos10 = new BABYLON.Vector3(10, -30, 0);
+            var woodPlat10 = new Plataforma(scene, woodPlatPos10, woodPlatRot10, 6, 3.5, 0.25);
+            woodPlat10.animatePlat(woodPlatPos7, new BABYLON.Vector3(-8, 0, 0), "position.y", 0, 7,);
+            var circleRot = new BABYLON.Vector3(0, 0, 0);
+            var circlePos = new BABYLON.Vector3(20, -50, 0);
+            var circle1 = new circle(scene, circlePos, circleRot, 6, 3.5, 0.25);
+            var circleRot1 = new BABYLON.Vector3(0, 0, 0);
+            var circlePos1 = new BABYLON.Vector3(-15, -48, 0);
+            var circle2 = new cube(scene, circlePos1, circleRot1, 0, 0, 0);
+
+            const canMaterial = new BABYLON.StandardMaterial("material", scene);
+            canMaterial.diffuseTexture = new BABYLON.Texture("https://assets.babylonjs.com/environments/logo_label.jpg")
+
+            const faceUV = [];
+            faceUV[0] = new BABYLON.Vector4(0, 0, 0, 0);
+            faceUV[1] = new BABYLON.Vector4(1, 0, 0.25, 1);
+            faceUV[2] = new BABYLON.Vector4(0, 0, 0.24, 1);
+            const faceColors = [];
+            faceColors[0] = new BABYLON.Color4(0.5, 0.5, 0.5, 1)
+
+            const can = BABYLON.MeshBuilder.CreateCylinder("can", { diameter: 5, height: 10, faceUV: faceUV, faceColors: faceColors });
+            can.material = canMaterial;
+            can.position.x = 2;
+            can.position.y = -42;
+            can.physicsImpostor = new BABYLON.PhysicsImpostor(this.can, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 0, restitution: 1 }, scene);
+
+            let size = 0.05;
+            pipePos = new BABYLON.Vector3(5, -32, 0);
+            pipeRot = new BABYLON.Vector3(0, 0, Math.PI);
+            pipeSize = new BABYLON.Vector3(size, size, size);
+            pipe = new Cano(pipePos, pipeRot, pipeSize);
+
+            let size1 = 0.05;
+            pipePos1 = new BABYLON.Vector3(-1, -32, 0);
+            pipeRot1 = new BABYLON.Vector3(Math.PI, 0, 0);
+            pipeSize1 = new BABYLON.Vector3(size1, size1, size1);
+            pipe1 = new Cano(pipePos1, pipeRot1, pipeSize1);
+
+            const bounce = new BABYLON.Sound("bounce", "textures/1.mp3", scene, null, { loop: true, autoplay: true });
+
+            var balloonPos1 = new BABYLON.Vector3(2, -57, 35);
+            var balloon1 = new Balao(scene, balloonPos1, BABYLON.Vector3.Up(), 12);
+            balloon1.animateSlideU(new BABYLON.Vector3(2, -57, 0), new BABYLON.Vector3(2, -57, 0), 'z');
+
+            var balloonPos2 = new BABYLON.Vector3(37, -57, 35);
+            var balloon2 = new Balao(scene, balloonPos2, BABYLON.Vector3.Up(), 12);
+            balloon2.animateSlideU(new BABYLON.Vector3(37, -57, 0), new BABYLON.Vector3(37, -57, 0), 'z');
+
+            var balloonPos3 = new BABYLON.Vector3(-35, -57, 35);
+            var balloon3 = new Balao(scene, balloonPos3, BABYLON.Vector3.Up(), 12);
+            balloon3.animateSlideU(new BABYLON.Vector3(-35, -57, 0), new BABYLON.Vector3(-35, -57, 0), 'z');
+
+            var h = 2;
+            do {
+                ball = new Ball(scene, h);
+                b = ball.getBall();
+                b.actionManager = new BABYLON.ActionManager(scene);
+                ballCount += 1;
+                h = h + 3;
+            } while (ballCount <= 0);
+
+
+            var h = 4;
+            do {
+                ball = new Ball(scene, h);
+                b = ball.getBall();
+                b.actionManager = new BABYLON.ActionManager(scene);
+                ballCount += 1;
+                h = h + 3;
+            } while (ballCount <= 0);
+
+            var h = -2;
+            do {
+                ball = new Ball(scene, h);
+                b = ball.getBall();
+                b.actionManager = new BABYLON.ActionManager(scene);
+                ballCount += 1;
+                h = h + 3;
+            } while (ballCount <= 0);
+
+            var h = 2;
+            do {
+                ball = new Balls(scene, h);
+                b = ball.getBall();
+                b.actionManager = new BABYLON.ActionManager(scene);
+                ballCount += 1;
+                h = h + 3;
+            } while (ballCount <= 0);
+
+
+            var h = 4;
+            do {
+                ball = new Balls(scene, h);
+                b = ball.getBall();
+                b.actionManager = new BABYLON.ActionManager(scene);
+                ballCount += 1;
+                h = h + 3;
+            } while (ballCount <= 0);
+
+            var h = -2;
+            do {
+                ball = new Balls(scene, h);
+                b = ball.getBall();
+                b.actionManager = new BABYLON.ActionManager(scene);
+                ballCount += 1;
+                h = h + 3;
+            } while (ballCount <= 0);
+
+            var h = 2;
+            do {
+                ball = new Ballss(scene, h);
+                b = ball.getBall();
+                b.actionManager = new BABYLON.ActionManager(scene);
+                ballCount += 1;
+                h = h + 3;
+            } while (ballCount <= 0);
+
+
+            var h = 4;
+            do {
+                ball = new Ballss(scene, h);
+                b = ball.getBall();
+                b.actionManager = new BABYLON.ActionManager(scene);
+                ballCount += 1;
+                h = h + 3;
+            } while (ballCount <= 0);
+
+            var h = -2;
+            do {
+                ball = new Ballss(scene, h);
+                b = ball.getBall();
+                b.actionManager = new BABYLON.ActionManager(scene);
+                ballCount += 1;
+                h = h + 3;
+            } while (ballCount <= 0);
+
+
+
+            var particleSystem = new BABYLON.ParticleSystem("particles", 5000, scene);
+
+            particleSystem.particleTexture = new BABYLON.Texture("textures/flare.png", scene);
+
+            particleSystem.emitter = new BABYLON.Vector3(2, -40, 0);
+            particleSystem.minEmitBox = new BABYLON.Vector3(-1, 0, 0);
+            particleSystem.maxEmitBox = new BABYLON.Vector3(1, 0, 0);
+            particleSystem.color1 = new BABYLON.Color4(0.7, 0.8, 1.0, 1.0);
+            particleSystem.color2 = new BABYLON.Color4(0.2, 0.5, 1.0, 1.0);
+            particleSystem.colorDead = new BABYLON.Color4(0, 0, 0.2, 0.0);
+            particleSystem.minSize = 0.1;
+            particleSystem.maxSize = 0.5;
+            particleSystem.minLifeTime = 2;
+            particleSystem.maxLifeTime = 3.5;
+            particleSystem.emitRate = 1500;
+            particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
+            particleSystem.gravity = new BABYLON.Vector3(0, -9.81, 0);
+            particleSystem.direction1 = new BABYLON.Vector3(-2, 8, 2);
+            particleSystem.direction2 = new BABYLON.Vector3(2, 8, -2);
+            particleSystem.minAngularSpeed = 0;
+            particleSystem.maxAngularSpeed = Math.PI;
+            particleSystem.minEmitPower = 1;
+            particleSystem.maxEmitPower = 3;
+            particleSystem.updateSpeed = 0.025;
+            particleSystem.start();
+
+
+            b.actionManager.registerAction(
+                new BABYLON.ExecuteCodeAction(
+                    {
+                        trigger: BABYLON.ActionManager.OnIntersectionEnterTrigger,
+                        parameter: killBox
+                    },
+                    function () {
+                        BABYLON.Animation.CreateAndStartAnimation("marbleVisAnim", b, "visibility", 60, 60, 1, 0, 0, null, () => {
+                            b.dispose();
+                            ballCount -= 1;
+                        });
+                    }
+                )
+            );
+
+            return scene;
+
+        };
+
+        window.initFunction = async function () {
+            var asyncEngineCreation = async function () {
+                try {
+                    return createDefaultEngine();
+                } catch (e) {
+                    console.log("the available createEngine function failed. Creating the default engine instead");
+                    return createDefaultEngine();
+                }
+            }
+
+            window.engine = await asyncEngineCreation();
+            if (!engine) throw 'engine should not be null.';
+            window.scene = createScene();
+        };
+
+        initFunction().then(() => {
+            sceneToRender = scene
+            engine.runRenderLoop(function (ball) {
+                if (sceneToRender && sceneToRender.activeCamera) {
+                    sceneToRender.render();
+                }
+            });
+        });
+
+        function createLightAndCamera(scene) {
+            const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 30, new BABYLON.Vector3(0, -10, -60));
+            camera.attachControl(canvas, true);
+            const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0));
+            return camera;
+        }
+
+        function createKillBox(scene) {
+            var killBox = BABYLON.MeshBuilder.CreateBox("killBox", { width: 100, depth: 100, height: 0.5 }, scene);
+            killBox.position = new BABYLON.Vector3(0, -50, 0);
+            killBox.visibility = 0;
+            return killBox;
+        }
+
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
+</body>
+
+</html>
